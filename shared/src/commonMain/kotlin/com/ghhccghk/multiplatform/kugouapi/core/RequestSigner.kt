@@ -1,7 +1,9 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.core
+package com.ghhccghk.multiplatform.kugouapi.core
 
-import com.ghhccghk.multiplatform.kugouapi.shared.KuGouConfig
-import com.ghhccghk.multiplatform.kugouapi.shared.model.EncryptType
+import com.ghhccghk.multiplatform.kugouapi.KuGouConfig
+import com.ghhccghk.multiplatform.kugouapi.model.EncryptType
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
 class RequestSigner(private val config: KuGouConfig) {
 
@@ -21,8 +23,8 @@ class RequestSigner(private val config: KuGouConfig) {
             .sortedBy { it.key }
             .joinToString("") { (key, value) ->
                 val v = if (value is Map<*, *>) {
-                    kotlinx.serialization.json.Json.encodeToString(
-                        kotlinx.serialization.serializer(), value
+                    Json.encodeToString(
+                        serializer(), value
                     )
                 } else {
                     normalize(value)

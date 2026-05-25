@@ -1,4 +1,4 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.model
+package com.ghhccghk.multiplatform.kugouapi.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

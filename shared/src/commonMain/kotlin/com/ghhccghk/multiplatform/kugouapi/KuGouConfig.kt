@@ -1,4 +1,4 @@
-package com.ghhccghk.multiplatform.kugouapi.shared
+package com.ghhccghk.multiplatform.kugouapi
 
 data class KuGouConfig(
     val appId: Int = 1005,

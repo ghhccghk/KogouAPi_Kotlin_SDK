@@ -1,9 +1,21 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.api
+package com.ghhccghk.multiplatform.kugouapi.api
 
-import com.ghhccghk.multiplatform.kugouapi.shared.KuGouConfig
-import com.ghhccghk.multiplatform.kugouapi.shared.core.*
-import com.ghhccghk.multiplatform.kugouapi.shared.model.EncryptType
+import com.ghhccghk.multiplatform.kugouapi.KuGouConfig
+import com.ghhccghk.multiplatform.kugouapi.core.Crypto
+import com.ghhccghk.multiplatform.kugouapi.core.HttpMethod
+import com.ghhccghk.multiplatform.kugouapi.core.KuGouRequest
+import com.ghhccghk.multiplatform.kugouapi.core.KuGouResponse
+import com.ghhccghk.multiplatform.kugouapi.core.PlatformIdentity
+import com.ghhccghk.multiplatform.kugouapi.core.RequestExecutor
+import com.ghhccghk.multiplatform.kugouapi.core.RequestSigner
+import com.ghhccghk.multiplatform.kugouapi.core.ResponseType
+import com.ghhccghk.multiplatform.kugouapi.core.aesEncryptAuto
+import com.ghhccghk.multiplatform.kugouapi.core.aesEncryptWith
+import com.ghhccghk.multiplatform.kugouapi.core.currentTimeMillis
+import com.ghhccghk.multiplatform.kugouapi.core.publicRasKey
+import com.ghhccghk.multiplatform.kugouapi.model.EncryptType
 import kotlinx.serialization.json.*
+import kotlinx.serialization.json.put
 
 /**
  * 认证与身份 API
@@ -19,7 +31,7 @@ class AuthApi(private val executor: RequestExecutor) {
     /**
      * 注册设备以获取设备唯一标识 dfid。
      *
-     * 该接口是访问酷狗大部分 API 的前提，返回的 dfid 会自动存储在 [CookieJar] 中供后续请求使用。
+     * 该接口是访问酷狗大部分 API 的前提，返回的 dfid 会自动存储在 [com.ghhccghk.multiplatform.kugouapi.core.CookieJar] 中供后续请求使用。
      * 逻辑完整对齐：https://github.com/MakcRe/KuGouMusicApi/blob/main/module/register_dev.js
      *
      * @param availableRamSize 可用内存大小 (字节)
@@ -443,7 +455,7 @@ class AuthApi(private val executor: RequestExecutor) {
                     "type" to 1,
                     "plat" to 4,
                     "qrcode_txt" to "https://h5.kugou.com/apps/loginQRCode/html/index.html?appid=${executor.config.activeAppId}&",
-                    "srcappid" to KuGouConfig.SRC_APP_ID,
+                    "srcappid" to KuGouConfig.Companion.SRC_APP_ID,
                 ),
                 encryptType = EncryptType.WEB,
             )
@@ -484,7 +496,7 @@ class AuthApi(private val executor: RequestExecutor) {
                 params = mapOf(
                     "plat" to 4,
                     "appid" to executor.config.activeAppId,
-                    "srcappid" to KuGouConfig.SRC_APP_ID,
+                    "srcappid" to KuGouConfig.Companion.SRC_APP_ID,
                     "qrcode" to key,
                 ),
                 encryptType = EncryptType.WEB,

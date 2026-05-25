@@ -1,4 +1,4 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.core
+package com.ghhccghk.multiplatform.kugouapi.core
 
 /**
  * Platform-specific cryptographic operations.

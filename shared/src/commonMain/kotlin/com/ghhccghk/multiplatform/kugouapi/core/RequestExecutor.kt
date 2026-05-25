@@ -1,7 +1,6 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.core
+package com.ghhccghk.multiplatform.kugouapi.core
 
-import com.ghhccghk.multiplatform.kugouapi.shared.KuGouConfig
-import com.ghhccghk.multiplatform.kugouapi.shared.model.EncryptType
+import com.ghhccghk.multiplatform.kugouapi.KuGouConfig
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*

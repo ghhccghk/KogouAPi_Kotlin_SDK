@@ -1,6 +1,6 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.core
+package com.ghhccghk.multiplatform.kugouapi.core
 
-import com.ghhccghk.multiplatform.kugouapi.shared.KuGouConfig
+import com.ghhccghk.multiplatform.kugouapi.KuGouConfig
 
 class CookieJar(private val config: KuGouConfig) {
     private val _cookies = mutableMapOf<String, String>()

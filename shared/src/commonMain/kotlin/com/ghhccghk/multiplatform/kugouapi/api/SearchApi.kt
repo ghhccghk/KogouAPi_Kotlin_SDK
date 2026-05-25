@@ -1,10 +1,10 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.api
+package com.ghhccghk.multiplatform.kugouapi.api
 
-import com.ghhccghk.multiplatform.kugouapi.shared.core.HttpMethod
-import com.ghhccghk.multiplatform.kugouapi.shared.core.KuGouRequest
-import com.ghhccghk.multiplatform.kugouapi.shared.core.KuGouResponse
-import com.ghhccghk.multiplatform.kugouapi.shared.core.RequestExecutor
-import com.ghhccghk.multiplatform.kugouapi.shared.model.SearchType
+import com.ghhccghk.multiplatform.kugouapi.core.HttpMethod
+import com.ghhccghk.multiplatform.kugouapi.core.KuGouRequest
+import com.ghhccghk.multiplatform.kugouapi.core.KuGouResponse
+import com.ghhccghk.multiplatform.kugouapi.core.RequestExecutor
+import com.ghhccghk.multiplatform.kugouapi.model.SearchType
 
 class SearchApi(private val executor: RequestExecutor) {
 

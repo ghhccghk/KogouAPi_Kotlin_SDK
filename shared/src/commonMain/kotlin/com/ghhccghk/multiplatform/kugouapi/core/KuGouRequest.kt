@@ -1,6 +1,6 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.core
+package com.ghhccghk.multiplatform.kugouapi.core
 
-import com.ghhccghk.multiplatform.kugouapi.shared.model.EncryptType
+import com.ghhccghk.multiplatform.kugouapi.model.EncryptType
 import io.ktor.http.ContentType
 
 data class KuGouRequest(

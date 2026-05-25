@@ -1,9 +1,9 @@
-package com.ghhccghk.multiplatform.kugouapi.shared
+package com.ghhccghk.multiplatform.kugouapi
 
-import com.ghhccghk.multiplatform.kugouapi.shared.api.AuthApi
-import com.ghhccghk.multiplatform.kugouapi.shared.api.SearchApi
-import com.ghhccghk.multiplatform.kugouapi.shared.core.CookieJar
-import com.ghhccghk.multiplatform.kugouapi.shared.core.RequestExecutor
+import com.ghhccghk.multiplatform.kugouapi.api.AuthApi
+import com.ghhccghk.multiplatform.kugouapi.api.SearchApi
+import com.ghhccghk.multiplatform.kugouapi.core.CookieJar
+import com.ghhccghk.multiplatform.kugouapi.core.RequestExecutor
 
 /**
  * KuGou Music API Kotlin Multiplatform SDK

@@ -1,6 +1,7 @@
-package com.ghhccghk.multiplatform.kugouapi.shared.core
+package com.ghhccghk.multiplatform.kugouapi.core
 
-import com.ghhccghk.multiplatform.kugouapi.shared.KuGouConfig
+import com.ghhccghk.multiplatform.kugouapi.KuGouConfig
+import kotlin.text.iterator
 
 internal object PlatformIdentity {
 
