@@ -65,7 +65,6 @@ class AuthApi(private val executor: RequestExecutor) {
         // 3. RSA 加密 (rsaEncrypt2)
         val rsaData = buildJsonObject {
             put("aes", aesKeyBase)
-            // 对齐 Node.js: 如果是数字 0 则传数字
             val uid = useridStr.toLongOrNull() ?: 0L
             put("uid", uid)
             put("token", token)

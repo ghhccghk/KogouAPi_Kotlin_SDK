@@ -25,7 +25,7 @@ internal class RequestSigner(private val config: KuGouConfig) {
                         kotlinx.serialization.serializer(), value
                     )
                 } else {
-                    value.toString()
+                    normalize(value)
                 }
                 "$key=$v"
             }

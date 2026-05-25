@@ -3,6 +3,7 @@ package com.ghhccghk.multiplatform.kugouapi.shared.core
 import com.ghhccghk.multiplatform.kugouapi.shared.KuGouConfig
 import com.ghhccghk.multiplatform.kugouapi.shared.model.EncryptType
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -56,13 +57,12 @@ class RequestExecutor internal constructor(
         if (!request.clearDefaultParams) {
             params["dfid"] = dfid
             params["mid"] = mid
-            params["uuid"] = mid
+            params["uuid"] = "-"
             params["appid"] = config.activeAppId
             params["clientver"] = config.activeClientVersion
             params["clienttime"] = clienttime
-            params["srcappid"] = 2919
-            if (token.isNotEmpty()) params["token"] = token else params["token"] = ""
-            if (userid != "0") params["userid"] = userid else params["userid"] = "0"
+            if (token.isNotEmpty()) params["token"] = token
+            if (userid != "0") params["userid"] = userid
         }
         params.putAll(request.params)
 
@@ -86,14 +86,10 @@ class RequestExecutor internal constructor(
             "kg-thash" to "5d816a0",
             "kg-rec" to "1",
             "kg-rf" to "B9EDA08A64250DEFFBCADDEE00F8F25F",
-            "X-Real-IP" to "192.168.4.22",
-            "X-Forwarded-For" to "192.168.4.22"
+            "X-Real-IP" to "114.114.114.114",
+            "X-Forwarded-For" to "114.114.114.114"
         )
         headers.putAll(request.headers)
-        println("=== Request Headers ===\n")
-        println(headers.toString())
-        // 在 execute() 里，发请求之前加
-        println("[Request URL] ${baseUrl + request.url}?${params.entries.sortedBy { it.key }.joinToString("&") { "${it.key}=${it.value}" }}")
 
         return try {
             val sortedKeys = params.keys.sorted()
@@ -112,7 +108,10 @@ class RequestExecutor internal constructor(
                 }
                 else -> {
                     client.post(baseUrl + request.url) {
-                        contentType(ContentType.Application.Json)
+                        // 如果 body 是 String（Base64 密文），移除默认的 application/json，防止服务器解析失败
+                        if (request.data !is String) {
+                            contentType(ContentType.Application.Json)
+                        }
                         headers.forEach { (k, v) -> header(k, v) }
                         request.data?.let { setBody(it) }
                         url {
@@ -125,20 +124,21 @@ class RequestExecutor internal constructor(
                 }
             }
 
-            // 解析响应
+            // 使用 body<ByteArray>() 获取原始字节
+            val responseBytes = response.body<ByteArray>()
+
             if (request.responseType == ResponseType.BYTES) {
-                val bytes = response.readRawBytes()
                 return KuGouResponse(
                     status = response.status.value,
                     body = buildJsonObject { 
-                        put("bytes", bytes.joinToString(",") { it.toString() })
+                        put("bytes", responseBytes.joinToString(",") { it.toString() })
                     },
                     cookies = extractCookies(response),
                     headers = response.headers.entries().associate { it.key to it.value.joinToString("; ") }
                 )
             }
 
-            val responseText = response.bodyAsText()
+            val responseText = responseBytes.decodeToString()
             val responseBody = try {
                 json.parseToJsonElement(responseText) as? JsonObject
                     ?: buildJsonObject { put("raw", responseText) }
