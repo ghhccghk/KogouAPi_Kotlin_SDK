@@ -2,6 +2,9 @@ package com.ghhccghk.multiplatform.kugouapi.core
 
 import platform.Foundation.*
 import kotlinx.cinterop.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import platform.posix.memset
 import platform.zlib.Z_DATA_ERROR
 import platform.zlib.Z_MEM_ERROR
@@ -59,7 +62,7 @@ actual object Crypto {
         return unpadded.decodeToString()
     }
 
-    actual suspend fun rsaEncrypt(data: ByteArray, publicKeyPem: String): String {
+    actual suspend fun rsaEncrypt(data: ByteArray, publicKeyPem: String): String = withContext(Dispatchers.IO) {
         val pemContent = extractPem(publicKeyPem)
         val keyBytes = decodeBase64(pemContent)
         val (modulus, exponent) = parseRsaPublicKey(keyBytes)
@@ -67,11 +70,11 @@ actual object Crypto {
         val result = message.modPow(exponent, modulus)
         val keyLength = (modulus.bitLength() + 7) / 8
         val resultBytes = result.toByteArray(keyLength)
-        return resultBytes.joinToString("") { (it.toInt() and 0xFF).toString(16).padStart(2, '0') }
+        resultBytes.joinToString("") { (it.toInt() and 0xFF).toString(16).padStart(2, '0') }
     }
 
-    actual suspend fun rsaEncryptPkcs1(data: ByteArray, publicKeyPem: String): String {
-        return rsaEncrypt(data, publicKeyPem)
+    actual suspend fun rsaEncryptPkcs1(data: ByteArray, publicKeyPem: String): String = withContext(Dispatchers.IO) {
+        rsaEncrypt(data, publicKeyPem)
     }
 
     actual fun encodeBase64(data: ByteArray): String {

@@ -59,7 +59,7 @@ actual object Crypto {
         return cipher.doFinal(data)
     }
 
-    actual suspend fun rsaEncrypt(data: ByteArray, publicKeyPem: String): String = withContext(Dispatchers.Default) {
+    actual suspend fun rsaEncrypt(data: ByteArray, publicKeyPem: String): String = withContext(Dispatchers.IO) {
         val keySpec = getRsaPublicKeySpec(publicKeyPem)
         val message = BigInteger(1, data)
         val encrypted = message.modPow(keySpec.publicExponent, keySpec.modulus)
@@ -75,7 +75,7 @@ actual object Crypto {
         padded.joinToString("") { "%02x".format(it) }
     }
 
-    actual suspend fun rsaEncryptPkcs1(data: ByteArray, publicKeyPem: String): String = withContext(Dispatchers.Default) {
+    actual suspend fun rsaEncryptPkcs1(data: ByteArray, publicKeyPem: String): String = withContext(Dispatchers.IO) {
         val pemContent = extractPemContent(publicKeyPem)
         val keyBytes = Base64.decode(pemContent, Base64.DEFAULT)
         val keyFactory = KeyFactory.getInstance("RSA")

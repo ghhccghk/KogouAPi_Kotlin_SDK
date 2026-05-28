@@ -14,6 +14,9 @@ import com.ghhccghk.multiplatform.kugouapi.core.aesEncryptWith
 import com.ghhccghk.multiplatform.kugouapi.core.currentTimeMillis
 import com.ghhccghk.multiplatform.kugouapi.core.publicRasKey
 import com.ghhccghk.multiplatform.kugouapi.model.EncryptType
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.json.put
 
@@ -576,19 +579,121 @@ class AuthApi(private val executor: RequestExecutor) {
     /**
      * 微信开放平台登录 (第一步: 获取二维码)。
      * 对齐 module/login_wx_create.js
+     *
+     * 流程:
+     * 1. 调用微信接口获取 access_token
+     * 2. 用 access_token 获取 sdk_ticket
+     * 3. 计算签名并请求 qrconnect 获取二维码信息
+     *
      */
     suspend fun createWxLogin(): KuGouResponse {
-        // 由于这涉及到微信 API，这里只是模拟 Node.js 端的逻辑
-        // 实际上在 Android 端通常使用微信 SDK
-        return executor.execute(
-            KuGouRequest(
-                baseUrl = "https://open.weixin.qq.com",
-                url = "/connect/sdk/qrconnect",
-                method = HttpMethod.GET,
-                // ... 内部逻辑较多，且依赖微信 AppID/Secret
-                encryptType = EncryptType.WEB
+        val isLite = executor.config.isLite
+        val appId = if (isLite) KuGouConfig.WX_LITE_APP_ID else KuGouConfig.WX_APP_ID
+        val secret = if (isLite) KuGouConfig.WX_LITE_SECRET else KuGouConfig.WX_SECRET
+
+        val client = HttpClient()
+        try {
+            // 1. 获取 access_token
+            val tokenResp = client.get("https://api.weixin.qq.com/cgi-bin/token") {
+                parameter("appid", appId)
+                parameter("secret", secret)
+                parameter("grant_type", "client_credential")
+            }.body<JsonObject>()
+
+            val accessToken = tokenResp["access_token"]?.jsonPrimitive?.content
+                ?: return KuGouResponse(
+                    status = 502,
+                    body = buildJsonObject {
+                        put("status", 0)
+                        put("msg", "获取微信 access_token 失败")
+                    },
+                    cookies = emptyMap(),
+                    headers = emptyMap()
+                )
+
+            // 2. 获取 sdk_ticket
+            val ticketResp = client.get("https://api.weixin.qq.com/cgi-bin/ticket/getticket") {
+                parameter("access_token", accessToken)
+                parameter("type", 2)
+            }.body<JsonObject>()
+
+            val ticket = ticketResp["ticket"]?.jsonPrimitive?.content
+            val errcode = ticketResp["errcode"]?.jsonPrimitive?.intOrNull ?: -1
+            if (errcode != 0 || ticket == null) {
+                return KuGouResponse(
+                    status = 502,
+                    body = buildJsonObject {
+                        put("status", 0)
+                        put("msg", "获取微信 sdk_ticket 失败: $ticketResp")
+                    },
+                    cookies = emptyMap(),
+                    headers = emptyMap()
+                )
+            }
+
+            // 3. 计算签名
+            val timestamp = currentTimeMillis() / 1000
+            val noncestr = Crypto.md5(PlatformIdentity.generateRandomString(16))
+            val signatureParams = "appid=${appId}&noncestr=${noncestr}&sdk_ticket=${ticket}&timestamp=${timestamp}"
+            val signature = Crypto.sha1(signatureParams)
+
+            // 4. 请求 qrconnect 获取二维码
+            val qrResp = client.get("https://open.weixin.qq.com/connect/sdk/qrconnect") {
+                parameter("appid", appId)
+                parameter("noncestr", noncestr)
+                parameter("timestamp", timestamp)
+                parameter("scope", "snsapi_userinfo")
+                parameter("signature", signature)
+            }.body<JsonObject>()
+
+            val qrErrcode = qrResp["errcode"]?.jsonPrimitive?.intOrNull ?: -1
+            if (qrErrcode != 0) {
+                return KuGouResponse(
+                    status = 502,
+                    body = buildJsonObject {
+                        put("status", 0)
+                        put("msg", "微信 qrconnect 请求失败: $qrResp")
+                    },
+                    cookies = emptyMap(),
+                    headers = emptyMap()
+                )
+            }
+
+            // 5. 补充 qrcodeurl 并返回
+            val uuid = qrResp["uuid"]?.jsonPrimitive?.content ?: ""
+            val qrcode = qrResp["qrcode"]?.jsonObject ?: buildJsonObject {}
+            val qrcodeUrl = "https://open.weixin.qq.com/connect/confirm?uuid=$uuid"
+
+            val mergedBody = buildJsonObject {
+                qrResp.forEach { (k, v) ->
+                    if (k == "qrcode") {
+                        put(k, buildJsonObject {
+                            qrcode.forEach { (qk, qv) -> put(qk, qv) }
+                            put("qrcodeurl", qrcodeUrl)
+                        })
+                    } else {
+                        put(k, v)
+                    }
+                }
+                if (!qrResp.containsKey("qrcode")) {
+                    put("qrcode", buildJsonObject { put("qrcodeurl", qrcodeUrl) })
+                }
+            }
+
+            return KuGouResponse(status = 200, body = mergedBody, cookies = emptyMap(), headers = emptyMap())
+        } catch (e: Exception) {
+            return KuGouResponse(
+                status = 502,
+                body = buildJsonObject {
+                    put("status", 0)
+                    put("msg", "微信登录异常: ${e.message}")
+                },
+                cookies = emptyMap(),
+                headers = emptyMap()
             )
-        )
+        } finally {
+            client.close()
+        }
     }
 
     /**

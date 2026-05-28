@@ -87,9 +87,7 @@ class RequestExecutor internal constructor(
             "kg-rf" to "B9EDA08A64250DEFFBCADDEE00F8F25F",
         )
         headers.putAll(request.headers)
-
-        println("[Search URL] ${baseUrl + request.url}?${params.entries.sortedBy { it.key }.joinToString("&") { "${it.key}=${it.value}" }}")
-
+        
         return try {
             val sortedKeys = params.keys.sorted()
             
