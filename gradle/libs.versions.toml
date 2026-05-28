@@ -16,6 +16,7 @@ kotlinx-coroutines = "1.11.0"
 ktorClientOkhttp = "3.5.0"
 material3 = "1.11.0-alpha07"
 slf4jSimple = "2.0.18"
+material3Version = "1.4.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -49,6 +50,7 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4jSimple" }
 wrappers-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser", version.ref = "kotlin-wrappers" }
 okio = { module = "com.squareup.okio:okio", version = "3.17.0" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3Version" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

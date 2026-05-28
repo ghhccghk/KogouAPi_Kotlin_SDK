@@ -20,7 +20,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
 @Composable
-fun App() {
+fun App(
+    paddingValues : PaddingValues = PaddingValues(0.dp)
+) {
     MaterialTheme {
         val client = remember { KuGouClient() }
         var logText by remember { mutableStateOf("等待测试...") }
@@ -40,7 +42,7 @@ fun App() {
         }
 
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
             color = MaterialTheme.colorScheme.background
         ) {
             Column(modifier = Modifier.padding(16.dp)) {

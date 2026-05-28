@@ -1,6 +1,8 @@
 package com.ghhccghk.multiplatform.kugouapi.core
 
 import android.util.Base64
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.MessageDigest
@@ -57,7 +59,7 @@ actual object Crypto {
         return cipher.doFinal(data)
     }
 
-    actual suspend fun rsaEncrypt(data: ByteArray, publicKeyPem: String): String {
+    actual suspend fun rsaEncrypt(data: ByteArray, publicKeyPem: String): String = withContext(Dispatchers.Default) {
         val keySpec = getRsaPublicKeySpec(publicKeyPem)
         val message = BigInteger(1, data)
         val encrypted = message.modPow(keySpec.publicExponent, keySpec.modulus)
@@ -70,10 +72,10 @@ actual object Crypto {
         } else if (result.size > keyLength) {
             result.copyOfRange(result.size - keyLength, result.size)
         } else result
-        return padded.joinToString("") { "%02x".format(it) }
+        padded.joinToString("") { "%02x".format(it) }
     }
 
-    actual suspend fun rsaEncryptPkcs1(data: ByteArray, publicKeyPem: String): String {
+    actual suspend fun rsaEncryptPkcs1(data: ByteArray, publicKeyPem: String): String = withContext(Dispatchers.Default) {
         val pemContent = extractPemContent(publicKeyPem)
         val keyBytes = Base64.decode(pemContent, Base64.DEFAULT)
         val keyFactory = KeyFactory.getInstance("RSA")
@@ -81,7 +83,7 @@ actual object Crypto {
         val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
         cipher.init(Cipher.ENCRYPT_MODE, publicKey)
         val encrypted = cipher.doFinal(data)
-        return encrypted.joinToString("") { "%02x".format(it) }
+        encrypted.joinToString("") { "%02x".format(it) }
     }
 
     actual fun encodeBase64(data: ByteArray): String {
